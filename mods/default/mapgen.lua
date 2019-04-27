@@ -890,7 +890,7 @@ end
 
 -- All mapgens except mgv6
 
-function default.register_biomes()
+function default.register_biomes(upper_limit)
 
 	-- Icesheet
 
@@ -909,7 +909,7 @@ function default.register_biomes()
 		depth_riverbed = 2,
 		node_dungeon = "default:ice",
 		node_dungeon_stair = "stairs:stair_ice",
-		y_max = 31000,
+		y_max = upper_limit,
 		y_min = -8,
 		heat_point = 0,
 		humidity_point = 73,
@@ -956,7 +956,7 @@ function default.register_biomes()
 		node_dungeon = "default:cobble",
 		node_dungeon_alt = "default:mossycobble",
 		node_dungeon_stair = "stairs:stair_cobble",
-		y_max = 31000,
+		y_max = upper_limit,
 		y_min = 47,
 		heat_point = 0,
 		humidity_point = 40,
@@ -1043,7 +1043,7 @@ function default.register_biomes()
 		node_dungeon = "default:cobble",
 		node_dungeon_alt = "default:mossycobble",
 		node_dungeon_stair = "stairs:stair_cobble",
-		y_max = 31000,
+		y_max = upper_limit,
 		y_min = 4,
 		heat_point = 25,
 		humidity_point = 70,
@@ -1095,7 +1095,7 @@ function default.register_biomes()
 		node_dungeon = "default:cobble",
 		node_dungeon_alt = "default:mossycobble",
 		node_dungeon_stair = "stairs:stair_cobble",
-		y_max = 31000,
+		y_max = upper_limit,
 		y_min = 4,
 		heat_point = 20,
 		humidity_point = 35,
@@ -1146,7 +1146,7 @@ function default.register_biomes()
 		node_dungeon = "default:cobble",
 		node_dungeon_alt = "default:mossycobble",
 		node_dungeon_stair = "stairs:stair_cobble",
-		y_max = 31000,
+		y_max = upper_limit,
 		y_min = 6,
 		heat_point = 50,
 		humidity_point = 35,
@@ -1213,7 +1213,7 @@ function default.register_biomes()
 		node_dungeon = "default:cobble",
 		node_dungeon_alt = "default:mossycobble",
 		node_dungeon_stair = "stairs:stair_cobble",
-		y_max = 31000,
+		y_max = upper_limit,
 		y_min = 6,
 		heat_point = 45,
 		humidity_point = 70,
@@ -1280,7 +1280,7 @@ function default.register_biomes()
 		node_dungeon = "default:cobble",
 		node_dungeon_alt = "default:mossycobble",
 		node_dungeon_stair = "stairs:stair_cobble",
-		y_max = 31000,
+		y_max = upper_limit,
 		y_min = 1,
 		heat_point = 60,
 		humidity_point = 68,
@@ -1347,7 +1347,7 @@ function default.register_biomes()
 		depth_riverbed = 2,
 		node_dungeon = "default:desert_stone",
 		node_dungeon_stair = "stairs:stair_desert_stone",
-		y_max = 31000,
+		y_max = upper_limit,
 		y_min = 4,
 		heat_point = 92,
 		humidity_point = 16,
@@ -1397,7 +1397,7 @@ function default.register_biomes()
 		depth_riverbed = 2,
 		node_dungeon = "default:sandstonebrick",
 		node_dungeon_stair = "stairs:stair_sandstone_block",
-		y_max = 31000,
+		y_max = upper_limit,
 		y_min = 4,
 		heat_point = 60,
 		humidity_point = 0,
@@ -1446,7 +1446,7 @@ function default.register_biomes()
 		node_dungeon = "default:cobble",
 		node_dungeon_alt = "default:mossycobble",
 		node_dungeon_stair = "stairs:stair_cobble",
-		y_max = 31000,
+		y_max = upper_limit,
 		y_min = 4,
 		heat_point = 40,
 		humidity_point = 0,
@@ -1496,7 +1496,7 @@ function default.register_biomes()
 		node_dungeon = "default:cobble",
 		node_dungeon_alt = "default:mossycobble",
 		node_dungeon_stair = "stairs:stair_cobble",
-		y_max = 31000,
+		y_max = upper_limit,
 		y_min = 1,
 		heat_point = 89,
 		humidity_point = 42,
@@ -1563,7 +1563,7 @@ function default.register_biomes()
 		node_dungeon = "default:cobble",
 		node_dungeon_alt = "default:mossycobble",
 		node_dungeon_stair = "stairs:stair_cobble",
-		y_max = 31000,
+		y_max = upper_limit,
 		y_min = 1,
 		heat_point = 86,
 		humidity_point = 65,
@@ -1615,6 +1615,29 @@ function default.register_biomes()
 		y_min = -31000,
 		heat_point = 86,
 		humidity_point = 65,
+	})
+end
+
+
+-- Biomes for floatlands
+
+function default.register_floatland_biomes(floatland_level, shadow_limit)
+
+	-- all other ocean biomes will be filtered out, so define one
+
+	minetest.register_biome({
+		name = "floatland_ocean",
+		node_top = "default:sand",
+		depth_top = 1,
+		node_filler = "default:sand",
+		depth_filler = 3,
+		node_dungeon = "default:cobble",
+		node_dungeon_alt = "default:mossycobble",
+		node_dungeon_stair = "stairs:stair_cobble",
+		y_max = floatland_level + 1,
+		y_min = shadow_limit,
+		heat_point = 50,
+		humidity_point = 50,
 	})
 end
 
@@ -2473,8 +2496,21 @@ end
 
 
 --
--- Detect mapgen to select functions
+-- Detect mapgen, flags and parameters to select functions
 --
+
+-- Get setting or default
+local mgv7_spflags = minetest.get_mapgen_setting("mgv7_spflags") or
+	"mountains, ridges, nofloatlands, caverns"
+local captures_float = string.match(mgv7_spflags, "floatlands")
+local captures_nofloat = string.match(mgv7_spflags, "nofloatlands")
+
+-- Get setting or default
+-- Make global for mods to use to register floatland biomes
+default.mgv7_floatland_level =
+	tonumber(minetest.get_mapgen_setting("mgv7_floatland_level") or 1280)
+default.mgv7_shadow_limit =
+	tonumber(minetest.get_mapgen_setting("mgv7_shadow_limit") or 1024)
 
 minetest.clear_registered_biomes()
 minetest.clear_registered_ores()
@@ -2485,8 +2521,101 @@ local mg_name = minetest.get_mapgen_setting("mg_name")
 if mg_name == "v6" then
 	default.register_mgv6_ores()
 	default.register_mgv6_decorations()
+-- Need to check for 'nofloatlands' because that contains
+-- 'floatlands' which makes the second condition true.
+elseif mg_name == "v7" and
+		captures_float == "floatlands" and
+		captures_nofloat ~= "nofloatlands" then
+	-- replace register functions
+	local float_biomes = {}
+
+	local old_register_biome = minetest.register_biome
+	function minetest.register_biome(def)
+		old_register_biome(def)
+
+		-- underground biome
+		if (def.y_min or 0) < 0 then return end
+		-- too high up (should not happen)
+		if (def.y_max or 31000) > default.mgv7_shadow_limit then return end
+		def = table.copy(def)
+
+		-- remove riverbed (?)
+		def.node_riverbed = nil
+		def.depth_riverbed = nil
+		-- extend height (if applicable)
+		if (def.y_max or 31000) >= default.mgv7_shadow_limit - 8 then
+			def.y_max = 31000
+		else
+			def.y_max = default.mgv7_floatland_level + def.y_max
+		end
+		def.y_min = default.mgv7_floatland_level + (def.y_min or 0)
+		-- rename
+		def.name = "floatland_" .. def.name
+
+		old_register_biome(def)
+		float_biomes[def.name] = true
+	end
+	local old_register_ore = minetest.register_ore
+	function minetest.register_ore(def)
+		if def.biomes ~= nil then
+			def = table.copy(def)
+			for _, name in ipairs(def.biomes) do
+				-- enable in float biomes if counterpart exists
+				if float_biomes["floatland_" .. name] then
+					table.insert(def.biomes, "floatland_" .. name)
+				end
+			end
+		end
+		old_register_ore(def)
+	end
+	local old_register_decoration = minetest.register_decoration
+	function minetest.register_decoration(def)
+		local added_biomes
+		if def.biomes ~= nil then
+			def = table.copy(def)
+			added_biomes = {}
+			for _, name in ipairs(def.biomes) do
+				-- enable in float biomes if counterpart exists
+				if float_biomes["floatland_" .. name] then
+					table.insert(added_biomes, "floatland_" .. name)
+				end
+			end
+			table.insert_all(def.biomes, added_biomes)
+		end
+		old_register_decoration(def)
+
+		-- underground decoration
+		if (def.y_min or 0) < -16 then return end
+		-- too high up (should not happen)
+		if (def.y_min or 0) > default.mgv7_shadow_limit then return end
+
+		if (def.y_max or 31000) > default.mgv7_floatland_level then
+			return -- decoration is not height-restricted, no need to duplicate
+		end
+		if added_biomes ~= nil and #added_biomes == 0 then
+			return -- decoration is restricted to biomes that don't exist in floatlands
+		end
+
+		def = table.copy(def)
+		-- modify height
+		def.y_max = default.mgv7_floatland_level + def.y_max
+		def.y_min = default.mgv7_floatland_level + (def.y_min or 0)
+		-- set biomes
+		def.biomes = added_biomes
+		-- unset name
+		def.name = nil
+
+		old_register_decoration(def)
+	end
+
+	-- Mgv7 with floatlands and floatland biomes
+	default.register_biomes(default.mgv7_shadow_limit - 1)
+	default.register_floatland_biomes(
+		default.mgv7_floatland_level, default.mgv7_shadow_limit)
+	default.register_ores()
+	default.register_decorations()
 else
-	default.register_biomes()
+	default.register_biomes(31000)
 	default.register_ores()
 	default.register_decorations()
 end
